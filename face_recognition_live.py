@@ -18,13 +18,16 @@ while True:
     face_locations = face_recognition.face_locations(rgb)
     face_encodings = face_recognition.face_encodings(rgb, face_locations)
 
+    import numpy as np
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         matches = face_recognition.compare_faces(known_encodings, face_encoding)
         name = "Unknown"
 
-        if True in matches:
-            index = matches.index(True)
-            name = known_names[index]
+        face_distances = face_recognition.face_distance(known_encodings, face_encoding)
+        if len(face_distances) > 0:
+            best_match_index = np.argmin(face_distances)
+            if matches[best_match_index]:
+                name = known_names[best_match_index]
 
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
